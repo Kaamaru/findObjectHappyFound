@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .endpoint {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .method {
+            font-weight: bold;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .post { background-color: #4CAF50; }
+        .get { background-color: #2196F3; }
+        .put { background-color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Documentation</h1>
+
+        <div class="endpoint">
+            <h2><span class="method post">POST</span> /newpost</h2>
+            <p>Creates a new "found item" post. This is a multipart form submission.</p>
+            <h3>Fields:</h3>
+            <ul>
+                <li><code>image_file_bytes</code>: The image file of the found item.</li>
+                <li><code>finder_name</code>: (Text) The name of the person who found the item.</li>
+                <li><code>found_location</code>: (Text) Where the item was found.</li>
+                <li><code>contact</code>: (Text) Contact information for the finder.</li>
+            </ul>
+            <h3>Returns:</h3>
+            <p>A status code and a string indicating the result of the upload and post creation.</p>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method post">POST</span> /upload</h2>
+            <p>Uploads one or more files. This is a multipart form submission.</p>
+            <h3>Details:</h3>
+            <p>The 'name' of each form field will be used as the file name in the storage bucket.</p>
+            <h3>Returns:</h3>
+            <p>A status code and a string with the upload results for each file.</p>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method put">PUT</span> /hello</h2>
+            <p>A simple test endpoint.</p>
+            <h3>Request Body (JSON):</h3>
+            <pre>{"happy": boolean}</pre>
+            <h3>Returns:</h3>
+            <p>The string "Hello World".</p>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method get">GET</span> /form</h2>
+            <p>An endpoint that takes query parameters.</p>
+            <h3>Query Parameters:</h3>
+            <ul>
+                <li><code>data_size</code>: (integer, required) A value between 1 and 10.</li>
+                <li><code>data_happiness</code>: (integer, required) A value greater than or equal to 2.</li>
+                <li><code>optional_field</code>: (string, optional) An optional text field.</li>
+            </ul>
+            <h3>Example:</h3>
+            <pre>/form?data_size=5&data_happiness=3&optional_field=test</pre>
+            <h3>Returns:</h3>
+            <p>The string "Ok."</p>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method get">GET</span> /ping</h2>
+            <p>A simple health-check endpoint.</p>
+            <h3>Returns:</h3>
+            <p>The string "pong!".</p>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method get">GET</span> /html</h2>
+            <p>Renders this API documentation.</p>
+            <h3>Returns:</h3>
+            <p>An HTML page (this page).</p>
+        </div>
+
+    </div>
+</body>
+</html>

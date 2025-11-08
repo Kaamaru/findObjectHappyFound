@@ -1,11 +1,12 @@
 #![allow(warnings)]
 
+
 use axum::{
     Router,
     extract::Multipart,
     http::response,
-    response::{IntoResponse, Response},
-    routing::{post, put,get},
+    response::{Html,IntoResponse, Response},
+    routing::{get, post, put},
 };
 use serde::{Deserialize, Serialize};
 
@@ -27,34 +28,52 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // upload_manual().await;
     let app = get_router();
-
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let url = format!("0.0.0.0:{}",config::PORT);
+    let listener = tokio::net::TcpListener::bind(url).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
 }
-
 fn get_router() -> Router {
     dotenv().ok();
 
     let app_config = config::AppConfig::from_env();
-    println!("{:?}", app_config);
 
     let app = Router::new()
         .route("/upload", post(upload_multipart))
         .route("/hello", put(hello))
         .route("/form", get(form_query))
+        .route("/ping", get(ping))
+        .route("/html", get(render_html))
         .route("/newpost", post(new_found_post))
         .with_state(app_config);
     return app;
 }
 
-#[derive(Serialize, Deserialize)]
-struct Payload {
-    happy: bool,
+
+pub async fn render_html()-> impl IntoResponse{
+    println!("pinged from client!!!!!!!!");
+    Html(include_str!("../index.html"))
+}
+pub async fn ping()-> impl IntoResponse{
+    println!("pinged from client!!!!!!!!");
+    "pong!"
+}
+use garde::{rules::required::Required, Validate};
+#[derive(Serialize, Deserialize,Validate)]
+struct TestPayload {
+    #[garde(required)]
+    happy: Option<bool>,
 }
 
-async fn hello(Json(payload): Json<Payload>) -> impl IntoResponse {
-    println!("{}", payload.happy);
-    "Hello World"
+
+async fn hello(Json(payload): Json<TestPayload>) -> impl IntoResponse {
+    if let Some(value) = payload.happy {
+        println!("{}", value);
+        return value.to_string();
+    } else {
+        eprintln!("Error: `happy` field is missing!");
+        return "Error: `happy` field is missing!".to_string();
+    }
+
 }

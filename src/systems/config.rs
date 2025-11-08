@@ -1,5 +1,7 @@
 use std::env;
 
+pub const PORT: i16 = 3000;
+
 #[derive(Clone, Debug)]
 pub struct AppConfig {
     pub endpoint_url: String,
