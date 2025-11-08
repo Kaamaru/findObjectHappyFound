@@ -46,6 +46,7 @@ fn get_router() -> Router {
         .route("/ping", get(ping))
         .route("/html", get(render_html))
         .route("/newpost", post(new_found_post))
+        .route("/database", get(get_database).post(post_database))
         .with_state(app_config);
     return app;
 }
