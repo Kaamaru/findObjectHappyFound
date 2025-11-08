@@ -1,8 +1,8 @@
-use axum::{body::Bytes, extract::Query};
+use axum::{body::Bytes, extract::{Query,State}, response::IntoResponse};
 use axum_valid::Garde;
 use garde::Validate;
 use serde::Deserialize;
-
+use crate::config::*;
 #[derive(Debug)]
 pub struct ValidatedBytes(Bytes);
 
@@ -58,7 +58,12 @@ pub struct SensitiveData {
     pub optional_field: Option<String>,
 }
 
-pub async fn form_query(Garde(Query(sensitivedata)): Garde<Query<SensitiveData>>) {
-    println!("Valid Data Accepted!");
+pub async fn form_query(
+    State(app_config): State<AppConfig>,
+    Garde(Query(sensitivedata)): Garde<Query<SensitiveData>>
+) -> impl IntoResponse
+{
+
     println!("{:?}", sensitivedata);
+    "Ok."
 }

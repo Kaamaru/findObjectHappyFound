@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    extract::Multipart,
+    extract::{Multipart, State},
     http::response,
     response::{IntoResponse, Response},
     routing::{post, put},
@@ -8,13 +8,11 @@ use axum::{
 use garde::{Validate, rules::length::bytes};
 use serde::{Deserialize, Serialize};
 
+use crate::config::AppConfig;
 use crate::valid::*;
 use anyhow::Result;
 use axum::extract::{Json, Path, Query};
-use dotenv::dotenv;
 use reqwest::{Client, StatusCode, header::HeaderMap};
-use std::env;
-
 #[derive(Deserialize, Serialize)]
 pub struct OnPOSTSuccess {
     #[serde(rename = "Id")]
@@ -33,7 +31,10 @@ pub struct OnPOSTFailure {
     pub message: String,
 }
 
-pub async fn new_found_post(mut multipart: Multipart) -> impl IntoResponse {
+pub async fn new_found_post(
+    State(app_config): State<AppConfig>,
+    mut multipart: Multipart,
+) -> impl IntoResponse {
     let mut foundpost = FoundPost::default();
 
     while let Some(mut field) = multipart.next_field().await.unwrap() {
@@ -82,31 +83,17 @@ pub async fn new_found_post(mut multipart: Multipart) -> impl IntoResponse {
     println!("Making a new post for {}", foundpost.finder_name);
 
     // ✅ Continue with your async handler (e.g., uploading to Supabase)
-    make_new_post(foundpost).await.into_response()
+    make_new_post(&app_config,foundpost).await.into_response()
 }
 
-pub async fn make_new_post(mut foundpost: FoundPost) -> (StatusCode, String) {
+pub async fn make_new_post(
+    app_config: &AppConfig,
+    mut foundpost: FoundPost,
+) -> (StatusCode, String) {
     // Load environment variables once
-    dotenv().ok();
-    let endpoint_url = match env::var("ENDPOINT_URL") {
-        Ok(url) => url,
-        Err(_) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "ENDPOINT_URL not set".to_string(),
-            );
-        }
-    };
-    let service_role = match env::var("SERVICE_ROLE") {
-        Ok(role) => role,
-        Err(_) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "SERVICE_ROLE not set".to_string(),
-            );
-        }
-    };
-    let project_name = env::var("PROJECT_NAME").unwrap_or_else(|_| "default".to_string());
+    let endpoint_url = &app_config.endpoint_url;
+    let service_role = &app_config.service_role;
+    let project_name = &app_config.project_name;
     let folder_name = "folder";
     // Create HTTP client once
     let client = Client::new();
@@ -159,24 +146,14 @@ pub async fn make_new_post(mut foundpost: FoundPost) -> (StatusCode, String) {
     }
 }
 
-
-
-pub async fn upload_multipart(mut multipart: Multipart) -> impl IntoResponse {
+pub async fn upload_multipart(
+    State(app_config): State<AppConfig>,
+    mut multipart: Multipart,
+) -> impl IntoResponse {
     // Load environment variables once
-    dotenv().ok();
-    let endpoint_url = match env::var("ENDPOINT_URL") {
-        Ok(url) => url,
-        Err(_) => {
-            return (StatusCode::INTERNAL_SERVER_ERROR, "ENDPOINT_URL not set").into_response();
-        }
-    };
-    let service_role = match env::var("SERVICE_ROLE") {
-        Ok(role) => role,
-        Err(_) => {
-            return (StatusCode::INTERNAL_SERVER_ERROR, "SERVICE_ROLE not set").into_response();
-        }
-    };
-    let project_name = env::var("PROJECT_NAME").unwrap_or_else(|_| "default".to_string());
+    let endpoint_url = &app_config.endpoint_url;
+    let service_role = &app_config.service_role;
+    let project_name = &app_config.project_name;
     let folder_name = "folder";
     // Create HTTP client once
     let client = Client::new();
@@ -241,12 +218,11 @@ pub async fn upload_multipart(mut multipart: Multipart) -> impl IntoResponse {
     }
 }
 
-pub async fn upload_manual() -> Result<()> {
-    dotenv().ok();
+pub async fn upload_manual(State(app_config):State<AppConfig>) -> Result<()> {
     println!("umm");
-    let endpoint_url = env::var("ENDPOINT_URL")?;
-    let service_role = env::var("SERVICE_ROLE")?;
-    let project_name = env::var("PROJECT_NAME")?;
+    let endpoint_url = &app_config.endpoint_url;
+    let service_role = &app_config.service_role;
+    let project_name = &app_config.project_name;
     let file_path = "./image1.jpg";
     let client = Client::builder().build()?;
     let mut headers = HeaderMap::new();

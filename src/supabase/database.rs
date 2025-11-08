@@ -8,13 +8,18 @@ use axum::{
 use garde::{rules::length::bytes, Validate};
 use serde::{Deserialize, Serialize};
 
-use crate::valid::*;
 use anyhow::Result;
 use axum::extract::{Json, Path, Query};
 use dotenv::dotenv;
 use reqwest::{header::HeaderMap, Client, StatusCode};
 use std::env;
 
+use crate::*;
+
+// pub async fn test() {
+//     let x = app_config;
+//     const var :i8 = 2;
+// }
 // pub async fn post_to_sql_database() -> impl IntoResponse {
 //     // Load environment variables once
 //     dotenv().ok();
